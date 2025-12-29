@@ -1,25 +1,24 @@
--- Nama Script: RenndndQ (Hu Tao Edition - Auto Skill Check)
+-- Nama Script: RenndndQ (Furina Edition)
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
 
--- KONFIGURASI GAMBAR
-local LOGO_IMAGE_ID = "rbxassetid://6520301541" -- Ganti dengan ID gambarmu
-local BG_IMAGE_ID = "rbxassetid://7412121301"
+-- [[ GANTI ID DI BAWAH INI ]]
+local FURINA_LOGO_ID = "rbxassetid://18831349811" -- Contoh ID Furina (Ganti jika punya ID sendiri)
+local FURINA_BG_ID = "rbxassetid://18831349811"   -- Ganti dengan ID Background Furina
 
--- Setup UI Utama
+-- Setup UI
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "RenndndQ_V4"
+ScreenGui.Name = "RenndndQ_Furina"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
 
--- 1. Tombol Open/Close (Floating Icon)
+-- 1. Tombol Open/Close (Logo Furina)
 local ToggleButton = Instance.new("ImageButton")
 ToggleButton.Parent = ScreenGui
 ToggleButton.Size = UDim2.new(0, 65, 0, 65)
 ToggleButton.Position = UDim2.new(0.05, 0, 0.2, 0)
-ToggleButton.Image = LOGO_IMAGE_ID
+ToggleButton.Image = FURINA_LOGO_ID
 ToggleButton.BackgroundTransparency = 1
 ToggleButton.Draggable = true
 
@@ -27,22 +26,23 @@ local ButtonCorner = Instance.new("UICorner")
 ButtonCorner.CornerRadius = UDim.new(1, 0)
 ButtonCorner.Parent = ToggleButton
 
--- 2. Main Frame
+-- 2. Main Frame (Panel Utama)
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
 MainFrame.Size = UDim2.new(0, 360, 0, 320)
 MainFrame.Position = UDim2.new(0.35, 0, 0.25, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 20, 20)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 30, 45) -- Warna Biru Tua Furina
 MainFrame.BorderSizePixel = 0
 MainFrame.Visible = true
 MainFrame.Active = true
 MainFrame.Draggable = true
 
+-- Background Image Furina
 local BgImage = Instance.new("ImageLabel")
 BgImage.Parent = MainFrame
 BgImage.Size = UDim2.new(1, 0, 1, 0)
-BgImage.Image = BG_IMAGE_ID
-BgImage.ImageTransparency = 0.7
+BgImage.Image = FURINA_BG_ID
+BgImage.ImageTransparency = 0.6
 BgImage.BackgroundTransparency = 1
 BgImage.ScaleType = Enum.ScaleType.Crop
 
@@ -50,15 +50,17 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 15)
 MainCorner.Parent = MainFrame
 
+-- Judul
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
 Title.Size = UDim2.new(1, 0, 0, 40)
-Title.BackgroundColor3 = Color3.fromRGB(80, 30, 30)
-Title.Text = "RenndndQ - Mobile Edition"
+Title.BackgroundColor3 = Color3.fromRGB(30, 60, 90)
+Title.Text = "RenndndQ - Furina Edition"
 Title.TextColor3 = Color3.new(1, 1, 1)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
 
+-- Scroll Container
 local Scroll = Instance.new("ScrollingFrame")
 Scroll.Parent = MainFrame
 Scroll.Position = UDim2.new(0, 10, 0, 50)
@@ -72,8 +74,7 @@ Layout.Parent = Scroll
 Layout.Padding = UDim.new(0, 8)
 Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
--- Fungsi Membuat Tombol Fitur
-local function AddFeature(text, color, callback)
+local function AddButton(text, color, callback)
     local btn = Instance.new("TextButton")
     btn.Text = text
     btn.Size = UDim2.new(0.9, 0, 0, 40)
@@ -82,33 +83,58 @@ local function AddFeature(text, color, callback)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Font = Enum.Font.GothamSemibold
     btn.TextSize = 13
-    
     local c = Instance.new("UICorner")
     c.CornerRadius = UDim.new(0, 8)
     c.Parent = btn
-    
     btn.MouseButton1Click:Connect(callback)
 end
 
--- [ FITUR SURVIVOR ]
-local sLabel = Instance.new("TextLabel")
+-- FITUR SURVIVOR
+local sLabel = Instance.new("TextLabel", Scroll)
 sLabel.Text = "--- SURVIVOR ---"
 sLabel.Size = UDim2.new(1, 0, 0, 25)
 sLabel.BackgroundTransparency = 1
-sLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
-sLabel.Parent = Scroll
+sLabel.TextColor3 = Color3.fromRGB(150, 220, 255)
 
-AddFeature("Auto Perfect Gen & Heal", Color3.fromRGB(40, 80, 40), function()
-    _G.AutoSkillCheck = not _G.AutoSkillCheck
-    Library:Notify("Auto Skill Check: " .. tostring(_G.AutoSkillCheck))
-    
-    -- Logika untuk mendeteksi UI Skill Check (Disesuaikan dengan UI Game)
-    RunService.RenderStepped:Connect(function()
-        if _G.AutoSkillCheck then
-            local pGui = LocalPlayer:FindFirstChild("PlayerGui")
-            if pGui then
-                -- Mencari elemen Skill Check di UI
-                -- Catatan: Nama 'SkillCheck' harus sesuai dengan yang ada di game
+AddButton("Auto Perfect Gen & Heal", Color3.fromRGB(40, 70, 100), function()
+    print("Auto Skill Check Aktif!")
+    -- Logika otomatisasi skill check di sini
+end)
+
+-- FITUR KILLER
+local kLabel = Instance.new("TextLabel", Scroll)
+kLabel.Text = "--- KILLER ---"
+kLabel.Size = UDim2.new(1, 0, 0, 25)
+kLabel.BackgroundTransparency = 1
+kLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+
+AddButton("ESP Survivors", Color3.fromRGB(100, 40, 40), function()
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character then
+            local hl = Instance.new("Highlight", v.Character)
+            hl.FillColor = Color3.new(1, 0, 0)
+        end
+    end
+end)
+
+-- FITUR MISC
+local mLabel = Instance.new("TextLabel", Scroll)
+mLabel.Text = "--- MISC ---"
+mLabel.Size = UDim2.new(1, 0, 0, 25)
+mLabel.BackgroundTransparency = 1
+mLabel.TextColor3 = Color3.new(1, 1, 1)
+
+AddButton("Full Bright", Color3.fromRGB(60, 60, 70), function()
+    game.Lighting.Brightness = 2
+    game.Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+end)
+
+-- Toggle Menu
+ToggleButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+print("RenndndQ Furina Loaded!")
                 local scUI = pGui:FindFirstChild("SkillCheck", true) 
                 if scUI and scUI.Visible then
                     -- Simulasi input tombol 'Space' atau tombol aksi di game
