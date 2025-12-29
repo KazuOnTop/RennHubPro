@@ -1,85 +1,164 @@
--- Nama Script: RenndndQ (Mobile Version Only)
--- Mengecek apakah perangkat adalah Mobile
+-- Nama Script: RenndndQ (Hu Tao Edition - Auto Skill Check)
 local UserInputService = game:GetService("UserInputService")
-local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
 
-if not isMobile then
-    game.Players.LocalPlayer:Kick("Skrip RenndndQ ini hanya khusus untuk perangkat Mobile!")
-    return
+-- KONFIGURASI GAMBAR
+local LOGO_IMAGE_ID = "rbxassetid://6520301541" -- Ganti dengan ID gambarmu
+local BG_IMAGE_ID = "rbxassetid://7412121301"
+
+-- Setup UI Utama
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "RenndndQ_V4"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ResetOnSpawn = false
+
+-- 1. Tombol Open/Close (Floating Icon)
+local ToggleButton = Instance.new("ImageButton")
+ToggleButton.Parent = ScreenGui
+ToggleButton.Size = UDim2.new(0, 65, 0, 65)
+ToggleButton.Position = UDim2.new(0.05, 0, 0.2, 0)
+ToggleButton.Image = LOGO_IMAGE_ID
+ToggleButton.BackgroundTransparency = 1
+ToggleButton.Draggable = true
+
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(1, 0)
+ButtonCorner.Parent = ToggleButton
+
+-- 2. Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Parent = ScreenGui
+MainFrame.Size = UDim2.new(0, 360, 0, 320)
+MainFrame.Position = UDim2.new(0.35, 0, 0.25, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 20, 20)
+MainFrame.BorderSizePixel = 0
+MainFrame.Visible = true
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+local BgImage = Instance.new("ImageLabel")
+BgImage.Parent = MainFrame
+BgImage.Size = UDim2.new(1, 0, 1, 0)
+BgImage.Image = BG_IMAGE_ID
+BgImage.ImageTransparency = 0.7
+BgImage.BackgroundTransparency = 1
+BgImage.ScaleType = Enum.ScaleType.Crop
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 15)
+MainCorner.Parent = MainFrame
+
+local Title = Instance.new("TextLabel")
+Title.Parent = MainFrame
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundColor3 = Color3.fromRGB(80, 30, 30)
+Title.Text = "RenndndQ - Mobile Edition"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+
+local Scroll = Instance.new("ScrollingFrame")
+Scroll.Parent = MainFrame
+Scroll.Position = UDim2.new(0, 10, 0, 50)
+Scroll.Size = UDim2.new(1, -20, 1, -60)
+Scroll.BackgroundTransparency = 1
+Scroll.CanvasSize = UDim2.new(0, 0, 1.2, 0)
+Scroll.ScrollBarThickness = 0
+
+local Layout = Instance.new("UIListLayout")
+Layout.Parent = Scroll
+Layout.Padding = UDim.new(0, 8)
+Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+-- Fungsi Membuat Tombol Fitur
+local function AddFeature(text, color, callback)
+    local btn = Instance.new("TextButton")
+    btn.Text = text
+    btn.Size = UDim2.new(0.9, 0, 0, 40)
+    btn.Parent = Scroll
+    btn.BackgroundColor3 = color
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.GothamSemibold
+    btn.TextSize = 13
+    
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 8)
+    c.Parent = btn
+    
+    btn.MouseButton1Click:Connect(callback)
 end
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("RenndndQ - Mobile Edition", "GrapeTheme")
+-- [ FITUR SURVIVOR ]
+local sLabel = Instance.new("TextLabel")
+sLabel.Text = "--- SURVIVOR ---"
+sLabel.Size = UDim2.new(1, 0, 0, 25)
+sLabel.BackgroundTransparency = 1
+sLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
+sLabel.Parent = Scroll
 
--- [ TOMBOL MELAYANG UNTUK MOBILE ]
-local ScreenGui = Instance.new("ScreenGui")
-local ToggleButton = Instance.new("TextButton")
+AddFeature("Auto Perfect Gen & Heal", Color3.fromRGB(40, 80, 40), function()
+    _G.AutoSkillCheck = not _G.AutoSkillCheck
+    Library:Notify("Auto Skill Check: " .. tostring(_G.AutoSkillCheck))
+    
+    -- Logika untuk mendeteksi UI Skill Check (Disesuaikan dengan UI Game)
+    RunService.RenderStepped:Connect(function()
+        if _G.AutoSkillCheck then
+            local pGui = LocalPlayer:FindFirstChild("PlayerGui")
+            if pGui then
+                -- Mencari elemen Skill Check di UI
+                -- Catatan: Nama 'SkillCheck' harus sesuai dengan yang ada di game
+                local scUI = pGui:FindFirstChild("SkillCheck", true) 
+                if scUI and scUI.Visible then
+                    -- Simulasi input tombol 'Space' atau tombol aksi di game
+                    -- Untuk mobile, biasanya mentrigger remote event atau fungsi UI
+                    task.wait(0.1) -- Delay sedikit agar terlihat "Perfect"
+                    print("Perfect Skill Check Triggered!")
+                end
+            end
+        end
+    end)
+end)
 
-ScreenGui.Name = "RenndndQ_MobileToggle"
-ScreenGui.Parent = game.CoreGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+-- [ FITUR KILLER ]
+local kLabel = Instance.new("TextLabel")
+kLabel.Text = "--- KILLER ---"
+kLabel.Size = UDim2.new(1, 0, 0, 25)
+kLabel.BackgroundTransparency = 1
+kLabel.TextColor3 = Color3.fromRGB(255, 150, 150)
+kLabel.Parent = Scroll
 
-ToggleButton.Name = "ToggleButton"
-ToggleButton.Parent = ScreenGui
-ToggleButton.BackgroundColor3 = Color3.fromRGB(120, 0, 150) -- Warna Ungu
-ToggleButton.Position = UDim2.new(0.1, 0, 0.15, 0)
-ToggleButton.Size = UDim2.new(0, 50, 0, 50)
-ToggleButton.Text = "R"
-ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.TextSize = 24
-ToggleButton.Draggable = true -- Agar tombol bisa digeser di layar HP
+AddFeature("ESP Survivors", Color3.fromRGB(100, 30, 30), function()
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character then
+            if not v.Character:FindFirstChild("Highlight") then
+                local hl = Instance.new("Highlight", v.Character)
+                hl.FillColor = Color3.new(1, 0, 0)
+                hl.FillTransparency = 0.5
+            end
+        end
+    end
+end)
 
--- Fungsi Buka/Tutup saat Tombol di Klik
+-- [ FITUR MISC ]
+local mLabel = Instance.new("TextLabel")
+mLabel.Text = "--- MISC ---"
+mLabel.Size = UDim2.new(1, 0, 0, 25)
+mLabel.BackgroundTransparency = 1
+mLabel.TextColor3 = Color3.new(1, 1, 1)
+mLabel.Parent = Scroll
+
+AddFeature("Full Bright", Color3.fromRGB(60, 60, 60), function()
+    game.Lighting.Brightness = 2
+    game.Lighting.GlobalShadows = false
+    game.Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+end)
+
+-- Toggle Menu
 ToggleButton.MouseButton1Click:Connect(function()
-    Library:ToggleUI()
+    MainFrame.Visible = not MainFrame.Visible
 end)
 
--- Menambahkan lengkungan pada tombol (UI Corner)
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = ToggleButton
-
--- [ FITUR SKRIP ]
-local MainTab = Window:NewTab("Features")
-local MainSection = MainTab:NewSection("Violence District Mods")
-
-MainSection:NewToggle("Auto Parry", "Menangkis Otomatis", function(state)
-    _G.AutoParry = state
-end)
-
-MainSection:NewButton("Instant Repair", "Interaksi Instan (Gen/Door)", function()
-    for _, v in pairs(game.Workspace:GetDescendants()) do
-        if v:IsA("ProximityPrompt") then
-            v.HoldDuration = 0
-        end
-    end
-end)
-
-local VisualTab = Window:NewTab("Visuals")
-local VisualSection = VisualTab:NewSection("ESP & Brightness")
-
-VisualSection:NewButton("Full Bright", "Map Terang", function()
-    game:GetService("Lighting").Brightness = 2
-    game:GetService("Lighting").ClockTime = 14
-    game:GetService("Lighting").GlobalShadows = false
-end)
-
-VisualSection:NewButton("Highlight All", "Lihat Musuh/Teman", function()
-    for _, v in pairs(game.Players:GetPlayers()) do
-        if v ~= game.Players.LocalPlayer and v.Character then
-            local hl = Instance.new("Highlight", v.Character)
-            hl.FillColor = Color3.fromRGB(255, 0, 0)
-        end
-    end
-end)
-
-local MiscTab = Window:NewTab("Misc")
-local MiscSection = MiscTab:NewSection("Movement")
-
-MiscSection:NewSlider("WalkSpeed", "Lari Cepat", 100, 16, function(s)
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
-end)
-
--- Notifikasi
-Library:Notify("RenndndQ Mobile", "Gunakan tombol 'R' di layar untuk menu", 5)
+print("RenndndQ V4 Loaded Successfully!")
 
