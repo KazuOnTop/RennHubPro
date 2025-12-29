@@ -1,107 +1,133 @@
---[[
-    DYRON MODE V1 - ADVANCED COMBAT SUITE
-    Features: ESP (Name, Dist, Highlight), Full Bright, Hitbox (1-25), Auto Parry
-]]
+-- [[ EClypse: Violence District Dominance Script ]] --
+-- Dipahat oleh: Ruinx
 
-local DyronV1 = {
-    Settings = {
-        ESP = {Names = true, Distance = true, Highlight = true},
-        HitboxSize = 15, -- Atur antara 1 - 25
-        AutoParryRange = 15,
-        FullBright = true
-    }
-}
-
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
 
---// FUNCTION: FULL BRIGHT (NIGHT VISION)
-if DyronV1.Settings.FullBright then
-    Lighting.Brightness = 2
-    Lighting.ClockTime = 14
-    Lighting.FogEnd = 100000
-    Lighting.GlobalShadows = false
-    Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
-        Lighting.ClockTime = 14
+-- UI Creation
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local ToggleButton = Instance.new("TextButton")
+local Container = Instance.new("ScrollingFrame")
+local UIListLayout = Instance.new("UIListLayout")
+
+-- Properties
+ScreenGui.Name = "Eclypse_VD"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ResetOnSpawn = false
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -125)
+MainFrame.Size = UDim2.new(0, 200, 0, 250)
+MainFrame.Active = true
+
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "[Eclypse] - Ruinx"
+Title.TextColor3 = Color3.fromRGB(200, 200, 200)
+Title.TextSize = 14
+
+Container.Name = "Container"
+Container.Parent = MainFrame
+Container.BackgroundTransparency = 1
+Container.Position = UDim2.new(0, 5, 0, 35)
+Container.Size = UDim2.new(1, -10, 1, -40)
+Container.ScrollBarThickness = 2
+
+UIListLayout.Parent = Container
+UIListLayout.Padding = UDim.new(0, 5)
+
+-- Draggable Logic (Perfect & No Bug)
+local dragging, dragInput, dragStart, startPos
+local function update(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+MainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+-- Feature Creator Function
+local function AddToggle(text, callback)
+    local Button = Instance.new("TextButton")
+    local state = false
+    
+    Button.Parent = Container
+    Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    Button.Size = UDim2.new(1, 0, 0, 30)
+    Button.Font = Enum.Font.Gotham
+    Button.Text = text .. ": OFF"
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.TextSize = 12
+    
+    Button.MouseButton1Click:Connect(function()
+        state = not state
+        Button.Text = text .. ": " .. (state and "ON" or "OFF")
+        Button.BackgroundColor3 = state and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(45, 45, 45)
+        callback(state)
     end)
 end
 
---// FUNCTION: ESP & HITBOX EXPANDER
-local function ApplyEnhancements(v)
-    if v ~= LocalPlayer then
-        local function Update()
-            local char = v.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                -- Hitbox Expander
-                local hrp = char.HumanoidRootPart
-                hrp.Size = Vector3.new(DyronV1.Settings.HitboxSize, DyronV1.Settings.HitboxSize, DyronV1.Settings.HitboxSize)
-                hrp.Transparency = 0.7
-                hrp.BrickColor = BrickColor.new("Really red")
-                hrp.CanCollide = false
-
-                -- Highlight
-                if DyronV1.Settings.ESP.Highlight and not char:FindFirstChild("Dyron_High") then
-                    local hl = Instance.new("Highlight", char)
-                    hl.Name = "Dyron_High"
-                    hl.FillTransparency = 0.5
-                    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                end
-
-                -- Name & Distance (BillboardGui)
-                if not char:FindFirstChild("Dyron_Tag") then
-                    local bg = Instance.new("BillboardGui", char)
-                    bg.Name = "Dyron_Tag"
-                    bg.AlwaysOnTop = true
-                    bg.Size = UDim2.new(0, 200, 0, 50)
-                    bg.ExtentsOffset = Vector3.new(0, 3, 0)
-                    
-                    local tl = Instance.new("TextLabel", bg)
-                    tl.Size = UDim2.new(1, 0, 1, 0)
-                    tl.BackgroundTransparency = 1
-                    tl.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    tl.TextStrokeTransparency = 0
-                    tl.TextSize = 14
-
-                    RunService.RenderStepped:Connect(function()
-                        if char:FindFirstChild("HumanoidRootPart") then
-                            local dist = math.floor((LocalPlayer.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude)
-                            tl.Text = string.format("%s\n[%sm]", v.Name, dist)
-                        end
-                    end)
-                end
-            end
-        end
-        v.CharacterAdded:Connect(Update)
-        if v.Character then Update() end
+-- Features for Violence District
+AddToggle("Auto Parry", function(v)
+    _G.AutoParry = v
+    while _G.AutoParry do
+        task.wait()
+        -- Logic deteksi serangan di sini (tergantung remote game)
     end
-end
-
---// FUNCTION: AUTO PARRY (LOGIC)
--- Catatan: Mengasumsikan mekanisme 'Parry' dipicu oleh RemoteEvent atau KeyCode 'F'
-local function AttemptParry()
-    for _, enemy in pairs(Players:GetPlayers()) do
-        if enemy ~= LocalPlayer and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-            local dist = (LocalPlayer.Character.HumanoidRootPart.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
-            if dist <= DyronV1.Settings.AutoParryRange then
-                -- Menstimulasi input 'F' untuk Parry
-                game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.F, false, game)
-                wait(0.1)
-                game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.F, false, game)
-            end
-        end
-    end
-end
-
---// CORE LOOP
-RunService.PostSimulation:Connect(function()
-    AttemptParry()
 end)
 
-for _, p in pairs(Players:GetPlayers()) do ApplyEnhancements(p) end
-Players.PlayerAdded:Connect(ApplyEnhancements)
+AddToggle("Full Bright", function(v)
+    if v then
+        game:GetService("Lighting").Brightness = 2
+        game:GetService("Lighting").ClockTime = 14
+        game:GetService("Lighting").FogEnd = 100000
+    else
+        game:GetService("Lighting").Brightness = 1
+    end
+end)
 
-print("DYRON MODE V1: ALL SYSTEMS OPERATIONAL")
+AddToggle("Speed Boost", function(v)
+    LocalPlayer.Character.Humanoid.WalkSpeed = v and 25 or 16
+end)
+
+-- Main Toggle Visibility (Insert/Delete)
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if not gpe and (input.KeyCode == Enum.KeyCode.Insert or input.KeyCode == Enum.KeyCode.RightControl) then
+        MainFrame.Visible = not MainFrame.Visible
+    end
+end)
+
+print("[Eclypse]: Script activated. Press Insert to Toggle UI.")
 
