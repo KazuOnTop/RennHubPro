@@ -1,148 +1,85 @@
---// RENNDND ALL IN ONE HUB (UI FIX HP)
---// UI Only Framework (Safe for Mobile)
+-- Nama Script: RenndndQ (Mobile Version Only)
+-- Mengecek apakah perangkat adalah Mobile
+local UserInputService = game:GetService("UserInputService")
+local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local LP = Players.LocalPlayer
-
--- ScreenGui
-local gui = Instance.new("ScreenGui")
-gui.Name = "RENNDND_HUB"
-gui.IgnoreGuiInset = true
-gui.ResetOnSpawn = false
-gui.Parent = LP:WaitForChild("PlayerGui")
-
--- Main Frame
-local main = Instance.new("Frame")
-main.Parent = gui
-main.Size = UDim2.fromScale(0.42, 0.48)
-main.Position = UDim2.fromScale(0.5, 0.5)
-main.AnchorPoint = Vector2.new(0.5, 0.5)
-main.BackgroundColor3 = Color3.fromRGB(20,20,20)
-main.BorderSizePixel = 0
-main.ZIndex = 50
-main.Active = true
-
--- Corner
-Instance.new("UICorner", main).CornerRadius = UDim.new(0,16)
-
--- UIScale (ANTI BUG HP)
-local scale = Instance.new("UIScale", main)
-scale.Scale = math.clamp(workspace.CurrentCamera.ViewportSize.X / 1920, 0.75, 1)
-
--- Background Image (Furina)
-local bg = Instance.new("ImageLabel", main)
-bg.Size = UDim2.fromScale(1,1)
-bg.Position = UDim2.fromScale(0,0)
-bg.Image = "rbxassetid://18442015523" -- Furina
-bg.BackgroundTransparency = 1
-bg.ImageTransparency = 0.25
-bg.ZIndex = 50
-
-Instance.new("UICorner", bg).CornerRadius = UDim.new(0,16)
-
--- Title
-local title = Instance.new("TextLabel", main)
-title.Size = UDim2.fromScale(1,0.1)
-title.Text = "RENNDND | ALL IN ONE"
-title.TextColor3 = Color3.new(1,1,1)
-title.BackgroundTransparency = 1
-title.TextScaled = true
-title.Font = Enum.Font.GothamBold
-title.ZIndex = 52
-
--- Toggle Button (+ / -)
-local toggle = Instance.new("TextButton", gui)
-toggle.Size = UDim2.fromOffset(40,40)
-toggle.AnchorPoint = Vector2.new(1,0)
-toggle.Position = UDim2.fromScale(0.98,0.02)
-toggle.Text = "-"
-toggle.TextScaled = true
-toggle.BackgroundColor3 = Color3.fromRGB(30,30,30)
-toggle.TextColor3 = Color3.new(1,1,1)
-toggle.ZIndex = 100
-Instance.new("UICorner", toggle).CornerRadius = UDim.new(1,0)
-
-local opened = true
-toggle.MouseButton1Click:Connect(function()
-    opened = not opened
-    main.Visible = opened
-    toggle.Text = opened and "-" or "+"
-end)
-
--- Drag (ANTI KELUAR LAYAR)
-local dragging, dragStart, startPos
-main.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = i.Position
-        startPos = main.Position
-    end
-end)
-
-UIS.InputChanged:Connect(function(i)
-    if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = i.Position - dragStart
-        main.Position = startPos + UDim2.fromOffset(delta.X, delta.Y)
-    end
-end)
-
-UIS.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
--- Scroll Container
-local list = Instance.new("ScrollingFrame", main)
-list.Position = UDim2.fromScale(0.05,0.15)
-list.Size = UDim2.fromScale(0.9,0.8)
-list.CanvasSize = UDim2.new(0,0,2,0)
-list.ScrollBarThickness = 4
-list.BackgroundTransparency = 1
-list.ZIndex = 52
-
-local layout = Instance.new("UIListLayout", list)
-layout.Padding = UDim.new(0,8)
-
--- Button Creator
-local function createToggle(name)
-    local b = Instance.new("TextButton")
-    b.Size = UDim2.new(1,0,0,42)
-    b.Text = "[ OFF ] "..name
-    b.TextScaled = true
-    b.Font = Enum.Font.Gotham
-    b.BackgroundColor3 = Color3.fromRGB(35,35,35)
-    b.TextColor3 = Color3.new(1,1,1)
-    b.ZIndex = 53
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
-
-    local state = false
-    b.MouseButton1Click:Connect(function()
-        state = not state
-        b.Text = (state and "[ ON ] " or "[ OFF ] ")..name
-        -- sambungkan logic fitur kamu di sini
-    end)
-    b.Parent = list
+if not isMobile then
+    game.Players.LocalPlayer:Kick("Skrip RenndndQ ini hanya khusus untuk perangkat Mobile!")
+    return
 end
 
--- ===== FEATURES LIST =====
--- Survivor
-createToggle("Auto Aim")
-createToggle("Auto Parry")
-createToggle("Auto Heal")
-createToggle("Auto Perfect Generator")
-createToggle("ESP Player + Distance")
-createToggle("Anti Blind Flashlight")
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("RenndndQ - Mobile Edition", "GrapeTheme")
 
--- Killer
-createToggle("Killer ESP (Red + Name)")
-createToggle("Hitbox Extender")
-createToggle("Infinity Ability")
-createToggle("Infinity Lunge")
-createToggle("Hook Spam (3 - 1000)")
-createToggle("Anti Stun Pallet")
-createToggle("Full Generator Break")
-createToggle("Mask Selector (The Mask)")
+-- [ TOMBOL MELAYANG UNTUK MOBILE ]
+local ScreenGui = Instance.new("ScreenGui")
+local ToggleButton = Instance.new("TextButton")
 
-print("RENNDND HUB UI Loaded")
+ScreenGui.Name = "RenndndQ_MobileToggle"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Parent = ScreenGui
+ToggleButton.BackgroundColor3 = Color3.fromRGB(120, 0, 150) -- Warna Ungu
+ToggleButton.Position = UDim2.new(0.1, 0, 0.15, 0)
+ToggleButton.Size = UDim2.new(0, 50, 0, 50)
+ToggleButton.Text = "R"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextSize = 24
+ToggleButton.Draggable = true -- Agar tombol bisa digeser di layar HP
+
+-- Fungsi Buka/Tutup saat Tombol di Klik
+ToggleButton.MouseButton1Click:Connect(function()
+    Library:ToggleUI()
+end)
+
+-- Menambahkan lengkungan pada tombol (UI Corner)
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = ToggleButton
+
+-- [ FITUR SKRIP ]
+local MainTab = Window:NewTab("Features")
+local MainSection = MainTab:NewSection("Violence District Mods")
+
+MainSection:NewToggle("Auto Parry", "Menangkis Otomatis", function(state)
+    _G.AutoParry = state
+end)
+
+MainSection:NewButton("Instant Repair", "Interaksi Instan (Gen/Door)", function()
+    for _, v in pairs(game.Workspace:GetDescendants()) do
+        if v:IsA("ProximityPrompt") then
+            v.HoldDuration = 0
+        end
+    end
+end)
+
+local VisualTab = Window:NewTab("Visuals")
+local VisualSection = VisualTab:NewSection("ESP & Brightness")
+
+VisualSection:NewButton("Full Bright", "Map Terang", function()
+    game:GetService("Lighting").Brightness = 2
+    game:GetService("Lighting").ClockTime = 14
+    game:GetService("Lighting").GlobalShadows = false
+end)
+
+VisualSection:NewButton("Highlight All", "Lihat Musuh/Teman", function()
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= game.Players.LocalPlayer and v.Character then
+            local hl = Instance.new("Highlight", v.Character)
+            hl.FillColor = Color3.fromRGB(255, 0, 0)
+        end
+    end
+end)
+
+local MiscTab = Window:NewTab("Misc")
+local MiscSection = MiscTab:NewSection("Movement")
+
+MiscSection:NewSlider("WalkSpeed", "Lari Cepat", 100, 16, function(s)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
+end)
+
+-- Notifikasi
+Library:Notify("RenndndQ Mobile", "Gunakan tombol 'R' di layar untuk menu", 5)
+
