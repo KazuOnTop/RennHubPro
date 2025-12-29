@@ -1,387 +1,148 @@
---[[ 
-VIOLENCE DISTRICT FULL HUB - ALL IN ONE
-UI + Survivor + Killer Features
-Background: Furina (Genshin Impact)
-]]
+--// RENNDND ALL IN ONE HUB (UI FIX HP)
+--// UI Only Framework (Safe for Mobile)
 
---================ SERVICES =================--
 local Players = game:GetService("Players")
-local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
-local Lighting = game:GetService("Lighting")
-local Camera = workspace.CurrentCamera
-local LocalPlayer = Players.LocalPlayer
+local LP = Players.LocalPlayer
 
---================ GUI =================--
-local Gui = Instance.new("ScreenGui", game.CoreGui)
-Gui.Name = "VD_AllInOneHub"
-Gui.ResetOnSpawn = false
+-- ScreenGui
+local gui = Instance.new("ScreenGui")
+gui.Name = "RENNDND_HUB"
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+gui.Parent = LP:WaitForChild("PlayerGui")
 
-local Main = Instance.new("Frame", Gui)
-Main.Size = UDim2.new(0,360,0,520)
-Main.Position = UDim2.new(0.58,0,0.18,0)
-Main.BackgroundColor3 = Color3.fromRGB(18,18,18)
-Main.BorderSizePixel = 0
-Main.Active = true
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0,12)
+-- Main Frame
+local main = Instance.new("Frame")
+main.Parent = gui
+main.Size = UDim2.fromScale(0.42, 0.48)
+main.Position = UDim2.fromScale(0.5, 0.5)
+main.AnchorPoint = Vector2.new(0.5, 0.5)
+main.BackgroundColor3 = Color3.fromRGB(20,20,20)
+main.BorderSizePixel = 0
+main.ZIndex = 50
+main.Active = true
 
--- Background (FURINA)
-local BG = Instance.new("ImageLabel", Main)
-BG.Size = UDim2.new(1,0,1,0)
-BG.Image = "rbxassetid://PUT_FURINA_IMAGE_ID_HERE"
-BG.ImageTransparency = 0.35
-BG.ScaleType = Enum.ScaleType.Crop
-BG.BackgroundTransparency = 1
-BG.ZIndex = 0
-Instance.new("UICorner", BG).CornerRadius = UDim.new(0,12)
+-- Corner
+Instance.new("UICorner", main).CornerRadius = UDim.new(0,16)
 
--- Top Bar
-local Top = Instance.new("Frame", Main)
-Top.Size = UDim2.new(1,0,0,38)
-Top.BackgroundColor3 = Color3.fromRGB(30,30,30)
-Top.BorderSizePixel = 0
-Top.ZIndex = 2
-Instance.new("UICorner", Top).CornerRadius = UDim.new(0,12)
+-- UIScale (ANTI BUG HP)
+local scale = Instance.new("UIScale", main)
+scale.Scale = math.clamp(workspace.CurrentCamera.ViewportSize.X / 1920, 0.75, 1)
 
-local Title = Instance.new("TextLabel", Top)
-Title.Size = UDim2.new(1,-50,1,0)
-Title.Position = UDim2.new(0,10,0,0)
-Title.Text = "Violence District • ALL IN ONE HUB"
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 14
-Title.TextColor3 = Color3.new(1,1,1)
-Title.BackgroundTransparency = 1
-Title.TextXAlignment = Left
-Title.ZIndex = 3
+-- Background Image (Furina)
+local bg = Instance.new("ImageLabel", main)
+bg.Size = UDim2.fromScale(1,1)
+bg.Position = UDim2.fromScale(0,0)
+bg.Image = "rbxassetid://18442015523" -- Furina
+bg.BackgroundTransparency = 1
+bg.ImageTransparency = 0.25
+bg.ZIndex = 50
 
-local Toggle = Instance.new("TextButton", Top)
-Toggle.Size = UDim2.new(0,32,0,26)
-Toggle.Position = UDim2.new(1,-38,0,6)
-Toggle.Text = "-"
-Toggle.Font = Enum.Font.GothamBold
-Toggle.TextSize = 18
-Toggle.TextColor3 = Color3.new(1,1,1)
-Toggle.BackgroundColor3 = Color3.fromRGB(70,70,70)
-Toggle.BorderSizePixel = 0
-Toggle.ZIndex = 3
-Instance.new("UICorner", Toggle).CornerRadius = UDim.new(0,6)
+Instance.new("UICorner", bg).CornerRadius = UDim.new(0,16)
 
-local Content = Instance.new("Frame", Main)
-Content.Size = UDim2.new(1,0,1,-38)
-Content.Position = UDim2.new(0,0,0,38)
-Content.BackgroundTransparency = 1
-Content.ZIndex = 2
+-- Title
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.fromScale(1,0.1)
+title.Text = "RENNDND | ALL IN ONE"
+title.TextColor3 = Color3.new(1,1,1)
+title.BackgroundTransparency = 1
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.ZIndex = 52
 
---================ BUTTON MAKER =================--
-local function Btn(text,y)
-	local b = Instance.new("TextButton", Content)
-	b.Size = UDim2.new(0.9,0,0,30)
-	b.Position = UDim2.new(0.05,0,0,y)
-	b.Text = text
-	b.Font = Enum.Font.Gotham
-	b.TextSize = 12
-	b.TextColor3 = Color3.new(1,1,1)
-	b.BackgroundColor3 = Color3.fromRGB(45,45,45)
-	b.BorderSizePixel = 0
-	b.ZIndex = 3
-	Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
-	return b
-end
+-- Toggle Button (+ / -)
+local toggle = Instance.new("TextButton", gui)
+toggle.Size = UDim2.fromOffset(40,40)
+toggle.AnchorPoint = Vector2.new(1,0)
+toggle.Position = UDim2.fromScale(0.98,0.02)
+toggle.Text = "-"
+toggle.TextScaled = true
+toggle.BackgroundColor3 = Color3.fromRGB(30,30,30)
+toggle.TextColor3 = Color3.new(1,1,1)
+toggle.ZIndex = 100
+Instance.new("UICorner", toggle).CornerRadius = UDim.new(1,0)
 
---================ BUTTONS =================--
-local ESPBtn    = Btn("ESP Player/Killer : OFF", 10)
-local GenBtn    = Btn("Auto Perfect Generator : OFF", 44)
-local HealBtn   = Btn("Auto Heal : OFF", 78)
-local AimBtn    = Btn("Auto Aim : OFF", 112)
-local BrightBtn = Btn("Full Bright : OFF", 146)
-
-local HitboxBtn = Btn("Killer Hitbox : OFF", 190)
-local InfBtn    = Btn("Infinity Ability : OFF", 224)
-local LungeBtn  = Btn("Infinity Lunge : OFF", 258)
-local HookBtn   = Btn("Hook Spam : OFF", 292)
-local BreakBtn  = Btn("Break All Generator : OFF", 326)
-local MaskBtn   = Btn("Mask Selector (The Mask)", 360)
-local StunBtn   = Btn("Anti Pallet Stun : OFF", 394)
-local BlindBtn  = Btn("Anti Flashlight Blind : OFF", 428)
-
---================ ESP =================--
-local ESP=false
-local ESPObjs={}
-
-local function clearESP()
-	for _,v in pairs(ESPObjs) do if v then v:Destroy() end end
-	ESPObjs={}
-end
-
-local function enableESP()
-	clearESP()
-	for _,p in pairs(Players:GetPlayers()) do
-		if p~=LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-			local hrp=p.Character.HumanoidRootPart
-			local bb=Instance.new("BillboardGui",hrp)
-			bb.Size=UDim2.new(0,150,0,45)
-			bb.AlwaysOnTop=true
-			local t=Instance.new("TextLabel",bb)
-			t.Size=UDim2.new(1,0,1,0)
-			t.BackgroundTransparency=1
-			t.Font=Enum.Font.GothamBold
-			t.TextSize=12
-			RS.RenderStepped:Connect(function()
-				if hrp and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-					local d=math.floor((hrp.Position-LocalPlayer.Character.HumanoidRootPart.Position).Magnitude)
-					local killer = p.Team and p.Team.Name=="Killer"
-					t.Text=p.Name.." ["..d.."m]"
-					t.TextColor3=killer and Color3.fromRGB(255,0,0) or Color3.new(1,1,1)
-				end
-			end)
-			table.insert(ESPObjs,bb)
-		end
-	end
-end
-
-ESPBtn.MouseButton1Click:Connect(function()
-	ESP=not ESP
-	ESPBtn.Text="ESP Player/Killer : "..(ESP and "ON" or "OFF")
-	if ESP then enableESP() else clearESP() end
+local opened = true
+toggle.MouseButton1Click:Connect(function()
+    opened = not opened
+    main.Visible = opened
+    toggle.Text = opened and "-" or "+"
 end)
 
---================ AUTO GENERATOR =================--
-local AutoGen=false
-GenBtn.MouseButton1Click:Connect(function()
-	AutoGen=not AutoGen
-	GenBtn.Text="Auto Perfect Generator : "..(AutoGen and "ON" or "OFF")
+-- Drag (ANTI KELUAR LAYAR)
+local dragging, dragStart, startPos
+main.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = i.Position
+        startPos = main.Position
+    end
 end)
 
-RS.RenderStepped:Connect(function()
-	if AutoGen then
-		for _,v in pairs(workspace:GetDescendants()) do
-			if v.Name=="SkillCheck" and v:FindFirstChild("Perfect") then
-				v.Perfect:FireServer() -- GANTI JIKA BEDA
-			end
-		end
-	end
-end)
-
---================ AUTO HEAL =================--
-local AutoHeal=false
-HealBtn.MouseButton1Click:Connect(function()
-	AutoHeal=not AutoHeal
-	HealBtn.Text="Auto Heal : "..(AutoHeal and "ON" or "OFF")
-end)
-
-RS.RenderStepped:Connect(function()
-	if AutoHeal then
-		local c=LocalPlayer.Character
-		if c and c:FindFirstChild("Humanoid") and c.Humanoid.Health<c.Humanoid.MaxHealth then
-			local r=c:FindFirstChild("HealRemote",true) -- GANTI JIKA BEDA
-			if r then r:FireServer() end
-		end
-	end
-end)
-
---================ AUTO AIM =================--
-local AutoAim=false
-AimBtn.MouseButton1Click:Connect(function()
-	AutoAim=not AutoAim
-	AimBtn.Text="Auto Aim : "..(AutoAim and "ON" or "OFF")
-end)
-
-local function closest()
-	local best,dist=nil,math.huge
-	for _,p in pairs(Players:GetPlayers()) do
-		if p~=LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-			local pos,on=Camera:WorldToViewportPoint(p.Character.Head.Position)
-			if on then
-				local m=(Vector2.new(pos.X,pos.Y)-UIS:GetMouseLocation()).Magnitude
-				if m<dist then dist=m best=p.Character.Head end
-			end
-		end
-	end
-	return best
-end
-
-RS.RenderStepped:Connect(function()
-	if AutoAim then
-		local t=closest()
-		if t then Camera.CFrame=CFrame.new(Camera.CFrame.Position,t.Position) end
-	end
-end)
-
---================ FULL BRIGHT =================--
-local Bright=false
-BrightBtn.MouseButton1Click:Connect(function()
-	Bright=not Bright
-	BrightBtn.Text="Full Bright : "..(Bright and "ON" or "OFF")
-	if Bright then
-		Lighting.Brightness=3
-		Lighting.ClockTime=14
-		Lighting.FogEnd=1e6
-	else
-		Lighting.Brightness=1
-	end
-end)
-
---================ KILLER FEATURES =================--
--- Hitbox
-local Hitbox=false
-HitboxBtn.MouseButton1Click:Connect(function()
-	Hitbox=not Hitbox
-	HitboxBtn.Text="Killer Hitbox : "..(Hitbox and "ON" or "OFF")
-	for _,p in pairs(Players:GetPlayers()) do
-		if p.Team and p.Team.Name=="Survivor" and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-			p.Character.HumanoidRootPart.Size=Hitbox and Vector3.new(10,10,10) or Vector3.new(2,2,1)
-			p.Character.HumanoidRootPart.Transparency=Hitbox and 0.5 or 1
-		end
-	end
-end)
-
--- Infinity Ability
-local Inf=false
-InfBtn.MouseButton1Click:Connect(function()
-	Inf=not Inf
-	InfBtn.Text="Infinity Ability : "..(Inf and "ON" or "OFF")
-end)
-
-RS.RenderStepped:Connect(function()
-	if Inf then
-		local c=LocalPlayer.Character
-		if c then
-			for _,v in pairs(c:GetDescendants()) do
-				if v:IsA("NumberValue") and v.Name=="Cooldown" then
-					v.Value=0
-				end
-			end
-		end
-	end
-end)
-
--- Infinity Lunge
-local Lunge=false
-LungeBtn.MouseButton1Click:Connect(function()
-	Lunge=not Lunge
-	LungeBtn.Text="Infinity Lunge : "..(Lunge and "ON" or "OFF")
-end)
-
-RS.RenderStepped:Connect(function()
-	if Lunge then
-		local c=LocalPlayer.Character
-		if c then
-			for _,v in pairs(c:GetDescendants()) do
-				if v.Name=="LungeCooldown" and v:IsA("NumberValue") then
-					v.Value=0
-				end
-			end
-		end
-	end
-end)
-
--- Hook Spam
-local Hook=false
-local HookMin,HookMax=3,1000
-HookBtn.MouseButton1Click:Connect(function()
-	Hook=not Hook
-	HookBtn.Text="Hook Spam : "..(Hook and "ON" or "OFF")
-end)
-
-task.spawn(function()
-	while task.wait(0.15) do
-		if Hook then
-			local c=LocalPlayer.Character
-			if c then
-				local r=c:FindFirstChild("HookRemote",true) -- GANTI JIKA BEDA
-				if r then
-					for i=1,math.random(HookMin,HookMax) do
-						r:FireServer()
-					end
-				end
-			end
-		end
-	end
-end)
-
--- Break All Generator
-local Break=false
-BreakBtn.MouseButton1Click:Connect(function()
-	Break=not Break
-	BreakBtn.Text="Break All Generator : "..(Break and "ON" or "OFF")
-end)
-
-task.spawn(function()
-	while task.wait(1) do
-		if Break then
-			for _,v in pairs(workspace:GetDescendants()) do
-				if v.Name=="Generator" then
-					local r=v:FindFirstChild("BreakRemote",true) -- GANTI JIKA BEDA
-					if r then r:FireServer() end
-				end
-			end
-		end
-	end
-end)
-
--- Mask Selector
-MaskBtn.MouseButton1Click:Connect(function()
-	local c=LocalPlayer.Character
-	if not c then return end
-	local m=c:FindFirstChild("MaskType",true) -- GANTI JIKA BEDA
-	if m then
-		m.Value=m.Value+1
-		if m.Value>5 then m.Value=1 end
-	end
-end)
-
--- Anti Stun
-local AntiStun=false
-StunBtn.MouseButton1Click:Connect(function()
-	AntiStun=not AntiStun
-	StunBtn.Text="Anti Pallet Stun : "..(AntiStun and "ON" or "OFF")
-end)
-
-RS.Stepped:Connect(function()
-	if AntiStun then
-		local s=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Stunned",true)
-		if s and s:IsA("BoolValue") then s.Value=false end
-	end
-end)
-
--- Anti Blind
-local AntiBlind=false
-BlindBtn.MouseButton1Click:Connect(function()
-	AntiBlind=not AntiBlind
-	BlindBtn.Text="Anti Flashlight Blind : "..(AntiBlind and "ON" or "OFF")
-end)
-
-RS.RenderStepped:Connect(function()
-	if AntiBlind then
-		local b=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Blinded",true)
-		if b and b:IsA("BoolValue") then b.Value=false end
-		if Lighting:FindFirstChild("Blur") then Lighting.Blur.Enabled=false end
-		if Lighting:FindFirstChild("Bloom") then Lighting.Bloom.Enabled=false end
-	end
-end)
-
---================ OPEN / CLOSE =================--
-local Open=true
-Toggle.MouseButton1Click:Connect(function()
-	Open=not Open
-	Content.Visible=Open
-	Toggle.Text=Open and "-" or "+"
-	Main.Size=Open and UDim2.new(0,360,0,520) or UDim2.new(0,360,0,38)
-end)
-
---================ DRAG =================--
-local dragging,dragStart,startPos
-Top.InputBegan:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 then
-		dragging=true dragStart=i.Position startPos=Main.Position
-	end
-end)
-Top.InputEnded:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 then dragging=false end
-end)
 UIS.InputChanged:Connect(function(i)
-	if dragging and i.UserInputType==Enum.UserInputType.MouseMovement then
-		local d=i.Position-dragStart
-		Main.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+d.X,startPos.Y.Scale,startPos.Y.Offset+d.Y)
-	end
+    if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = i.Position - dragStart
+        main.Position = startPos + UDim2.fromOffset(delta.X, delta.Y)
+    end
 end)
+
+UIS.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- Scroll Container
+local list = Instance.new("ScrollingFrame", main)
+list.Position = UDim2.fromScale(0.05,0.15)
+list.Size = UDim2.fromScale(0.9,0.8)
+list.CanvasSize = UDim2.new(0,0,2,0)
+list.ScrollBarThickness = 4
+list.BackgroundTransparency = 1
+list.ZIndex = 52
+
+local layout = Instance.new("UIListLayout", list)
+layout.Padding = UDim.new(0,8)
+
+-- Button Creator
+local function createToggle(name)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1,0,0,42)
+    b.Text = "[ OFF ] "..name
+    b.TextScaled = true
+    b.Font = Enum.Font.Gotham
+    b.BackgroundColor3 = Color3.fromRGB(35,35,35)
+    b.TextColor3 = Color3.new(1,1,1)
+    b.ZIndex = 53
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
+
+    local state = false
+    b.MouseButton1Click:Connect(function()
+        state = not state
+        b.Text = (state and "[ ON ] " or "[ OFF ] ")..name
+        -- sambungkan logic fitur kamu di sini
+    end)
+    b.Parent = list
+end
+
+-- ===== FEATURES LIST =====
+-- Survivor
+createToggle("Auto Aim")
+createToggle("Auto Parry")
+createToggle("Auto Heal")
+createToggle("Auto Perfect Generator")
+createToggle("ESP Player + Distance")
+createToggle("Anti Blind Flashlight")
+
+-- Killer
+createToggle("Killer ESP (Red + Name)")
+createToggle("Hitbox Extender")
+createToggle("Infinity Ability")
+createToggle("Infinity Lunge")
+createToggle("Hook Spam (3 - 1000)")
+createToggle("Anti Stun Pallet")
+createToggle("Full Generator Break")
+createToggle("Mask Selector (The Mask)")
+
+print("RENNDND HUB UI Loaded")
