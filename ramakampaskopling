@@ -1,146 +1,107 @@
--- Nama Script: RenndndQ (Anti-Fail Edition)
-local UserInputService = game:GetService("UserInputService")
+--[[
+    DYRON MODE V1 - ADVANCED COMBAT SUITE
+    Features: ESP (Name, Dist, Highlight), Full Bright, Hitbox (1-25), Auto Parry
+]]
+
+local DyronV1 = {
+    Settings = {
+        ESP = {Names = true, Distance = true, Highlight = true},
+        HitboxSize = 15, -- Atur antara 1 - 25
+        AutoParryRange = 15,
+        FullBright = true
+    }
+}
+
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
--- Setup UI Utama
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "RenndndQ_Final"
-ScreenGui.Parent = game.CoreGui
-ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
--- 1. Tombol Buka/Tutup (Bulat)
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "Toggle"
-ToggleButton.Parent = ScreenGui
-ToggleButton.Size = UDim2.new(0, 55, 0, 55)
-ToggleButton.Position = UDim2.new(0.05, 0, 0.2, 0)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-ToggleButton.Text = "R"
-ToggleButton.TextColor3 = Color3.new(1, 1, 1)
-ToggleButton.TextSize = 24
-ToggleButton.Font = Enum.Font.GothamBold
-ToggleButton.ZIndex = 10
-ToggleButton.Draggable = true
-
-local ButtonCorner = Instance.new("UICorner", ToggleButton)
-ButtonCorner.CornerRadius = UDim.new(1, 0)
-
--- 2. Main Frame
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "Main"
-MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 320, 0, 280)
-MainFrame.Position = UDim2.new(0.35, 0, 0.25, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-MainFrame.BorderSizePixel = 0
-MainFrame.Draggable = true
-
-local MainCorner = Instance.new("UICorner", MainFrame)
-MainCorner.CornerRadius = UDim.new(0, 15)
-
-local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1, 0, 0, 45)
-Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Title.Text = "RenndndQ - Anti Fail"
-Title.TextColor3 = Color3.fromRGB(0, 200, 255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
-Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 15)
-
-local Scroll = Instance.new("ScrollingFrame", MainFrame)
-Scroll.Position = UDim2.new(0, 10, 0, 55)
-Scroll.Size = UDim2.new(1, -20, 1, -65)
-Scroll.BackgroundTransparency = 1
-Scroll.CanvasSize = UDim2.new(0, 0, 1.5, 0)
-Scroll.ScrollBarThickness = 0
-
-local Layout = Instance.new("UIListLayout", Scroll)
-Layout.Padding = UDim.new(0, 10)
-Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
--- Fungsi Tambah Tombol
-local function AddButton(text, color, callback)
-    local btn = Instance.new("TextButton", Scroll)
-    btn.Text = text
-    btn.Size = UDim2.new(0.95, 0, 0, 40)
-    btn.BackgroundColor3 = color
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.GothamSemibold
-    btn.TextSize = 14
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-    btn.MouseButton1Click:Connect(callback)
+--// FUNCTION: FULL BRIGHT (NIGHT VISION)
+if DyronV1.Settings.FullBright then
+    Lighting.Brightness = 2
+    Lighting.ClockTime = 14
+    Lighting.FogEnd = 100000
+    Lighting.GlobalShadows = false
+    Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
+        Lighting.ClockTime = 14
+    end)
 end
 
--- [ FITUR: ANTI-FAIL GENERATOR ]
-_G.AntiFail = false
-AddButton("Anti-Fail Gen & Heal", Color3.fromRGB(30, 80, 30), function()
-    _G.AntiFail = not _G.AntiFail
-    print("Anti-Fail Status: ", _G.AntiFail)
-end)
+--// FUNCTION: ESP & HITBOX EXPANDER
+local function ApplyEnhancements(v)
+    if v ~= LocalPlayer then
+        local function Update()
+            local char = v.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                -- Hitbox Expander
+                local hrp = char.HumanoidRootPart
+                hrp.Size = Vector3.new(DyronV1.Settings.HitboxSize, DyronV1.Settings.HitboxSize, DyronV1.Settings.HitboxSize)
+                hrp.Transparency = 0.7
+                hrp.BrickColor = BrickColor.new("Really red")
+                hrp.CanCollide = false
 
--- Loop Deteksi Skill Check (Universal Logic)
-RunService.RenderStepped:Connect(function()
-    if _G.AntiFail then
-        local pGui = LocalPlayer:FindFirstChild("PlayerGui")
-        -- Mencari bar skill check yang sedang aktif
-        for _, v in pairs(pGui:GetDescendants()) do
-            if v.Name == "SkillCheck" or v.Name:find("Check") then
-                if v.Visible or v.BackgroundTransparency < 1 then
-                    -- Simulasi klik/input sukses otomatis
-                    task.wait(0.05) 
-                    print("Auto Perfect Triggered!")
+                -- Highlight
+                if DyronV1.Settings.ESP.Highlight and not char:FindFirstChild("Dyron_High") then
+                    local hl = Instance.new("Highlight", char)
+                    hl.Name = "Dyron_High"
+                    hl.FillTransparency = 0.5
+                    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                end
+
+                -- Name & Distance (BillboardGui)
+                if not char:FindFirstChild("Dyron_Tag") then
+                    local bg = Instance.new("BillboardGui", char)
+                    bg.Name = "Dyron_Tag"
+                    bg.AlwaysOnTop = true
+                    bg.Size = UDim2.new(0, 200, 0, 50)
+                    bg.ExtentsOffset = Vector3.new(0, 3, 0)
+                    
+                    local tl = Instance.new("TextLabel", bg)
+                    tl.Size = UDim2.new(1, 0, 1, 0)
+                    tl.BackgroundTransparency = 1
+                    tl.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    tl.TextStrokeTransparency = 0
+                    tl.TextSize = 14
+
+                    RunService.RenderStepped:Connect(function()
+                        if char:FindFirstChild("HumanoidRootPart") then
+                            local dist = math.floor((LocalPlayer.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude)
+                            tl.Text = string.format("%s\n[%sm]", v.Name, dist)
+                        end
+                    end)
                 end
             end
         end
+        v.CharacterAdded:Connect(Update)
+        if v.Character then Update() end
     end
-end)
+end
 
--- [ FITUR: ESP NAME & OUTLINE ]
-AddButton("ESP Names & Outline", Color3.fromRGB(100, 30, 30), function()
-    for _, v in pairs(Players:GetPlayers()) do
-        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
-            -- 1. Outline (Highlight)
-            if not v.Character:FindFirstChild("ESPHighlight") then
-                local hl = Instance.new("Highlight", v.Character)
-                hl.Name = "ESPHighlight"
-                hl.FillColor = Color3.new(1, 0, 0)
-                hl.FillTransparency = 0.5
-            end
-            
-            -- 2. Name Tag
-            if not v.Character.Head:FindFirstChild("NameTag") then
-                local bb = Instance.new("BillboardGui", v.Character.Head)
-                bb.Name = "NameTag"
-                bb.Size = UDim2.new(0, 100, 0, 50)
-                bb.AlwaysOnTop = true
-                bb.ExtentsOffset = Vector3.new(0, 3, 0)
-                
-                local lbl = Instance.new("TextLabel", bb)
-                lbl.Text = v.Name
-                lbl.Size = UDim2.new(1, 0, 1, 0)
-                lbl.BackgroundTransparency = 1
-                lbl.TextColor3 = Color3.new(1, 1, 1)
-                lbl.TextStrokeTransparency = 0
-                lbl.Font = Enum.Font.GothamBold
-                lbl.TextSize = 14
+--// FUNCTION: AUTO PARRY (LOGIC)
+-- Catatan: Mengasumsikan mekanisme 'Parry' dipicu oleh RemoteEvent atau KeyCode 'F'
+local function AttemptParry()
+    for _, enemy in pairs(Players:GetPlayers()) do
+        if enemy ~= LocalPlayer and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
+            local dist = (LocalPlayer.Character.HumanoidRootPart.Position - enemy.Character.HumanoidRootPart.Position).Magnitude
+            if dist <= DyronV1.Settings.AutoParryRange then
+                -- Menstimulasi input 'F' untuk Parry
+                game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.F, false, game)
+                wait(0.1)
+                game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.F, false, game)
             end
         end
     end
+end
+
+--// CORE LOOP
+RunService.PostSimulation:Connect(function()
+    AttemptParry()
 end)
 
--- [ MISC ]
-AddButton("Full Bright", Color3.fromRGB(50, 50, 50), function()
-    game.Lighting.Brightness = 2
-    game.Lighting.GlobalShadows = false
-end)
+for _, p in pairs(Players:GetPlayers()) do ApplyEnhancements(p) end
+Players.PlayerAdded:Connect(ApplyEnhancements)
 
--- Open/Close Logic
-ToggleButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
-
-print("RenndndQ v9 Fully Loaded!")
+print("DYRON MODE V1: ALL SYSTEMS OPERATIONAL")
 
